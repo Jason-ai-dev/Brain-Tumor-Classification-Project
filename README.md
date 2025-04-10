@@ -1,100 +1,99 @@
+# Brain Tumor Finder
 
-Brain Tumor Finder
-This project implements a comprehensive brain tumor detection system using a two-stage approach:
+A two‑stage brain tumor detection system that first classifies MRI scans as “tumor” vs. “no tumor” using a CNN, then pinpoints tumor locations with a YOLOv8 object‑detector.
 
-A CNN classifier to determine if a brain scan contains a tumor (binary classification: 0 or 1)
-A YOLOv8 model to predict the exact location of tumors using bounding boxes
-Directory Structure
-CopyInsert
-Brain Tumor Finder/
-├── data/                  # Dataset directory
-│   └── yolo_dataset/      # YOLO formatted dataset
-├── models/                # Model weights and configurations
-│   └── CNN Brain Tumor Classifier/  # CNN classification model
-│       ├── dataset.py     # Dataset loading utilities
-│       ├── inference.py   # Inference utilities
-│       ├── main.py        # Main script to run the CNN model
-│       ├── model.py       # CNN model architecture
-│       ├── test.py        # Script to test the CNN model
-│       ├── train.py       # Training functions
-│       └── transforms.py  # Image transformations
-├── results/               # Prediction results and visualizations
-├── runs/                  # Training run outputs
-├── src/                   # Source code
-│   ├── config/            # Configuration settings
-│   │   └── config.py      # Configuration parameters
-│   └── models/            # Model implementation files
-│       ├── predict.py     # Script for bounding box prediction
-│       └── yolo.py        # YOLO model setup utilities
-└── tumor_classifier.pth   # CNN classifier model weights
-How to Use
-Follow these steps in order to perform the complete brain tumor detection workflow:
+---
 
-Step 1: Train CNN Classification Model
-First, train the CNN model to classify brain scans as having tumors (1) or not having tumors (0).
+## 📂 Directory Structure
 
-bash
-CopyInsert
-cd "models\CNN Brain Tumor Classifier"
-python main.py
-This script:
+Brain Tumor Finder/ ├── data/ │ └── yolo_dataset/ # YOLO‑formatted images + labels ├── models/ │ └── CNN Brain Tumor Classifier/ │ ├── dataset.py # Data loading & preprocessing │ ├── inference.py # Single‑image inference utilities │ ├── main.py # Training entry point │ ├── model.py # CNN architecture │ ├── test.py # Batch testing & metrics │ ├── train.py # Training loops & helpers │ └── transforms.py # TorchVision transforms ├── runs/ # Training logs & checkpoints ├── results/ │ ├── predictions/ # YOLO output images (bbox) │ └── visualizations/ # Side‑by‑side ground truth vs. pred ├── src/ │ ├── config/ │ │ └── config.py # All hyperparameters & paths │ └── models/ │ ├── yolo.py # YOLOv8 model setup │ └── predict.py # Run YOLO inference on positives └── tumor_classifier.pth # Trained CNN weights
 
-Loads and preprocesses the training dataset
-Builds and trains the CNN classifier model
-Saves the trained model weights
-Displays training progress and accuracy metrics
-Step 2: Test CNN Model on Dataset
-Next, evaluate the CNN model on the test dataset to identify brain scans containing tumors:
+yaml
+Copy
+Edit
 
-bash
-CopyInsert
-cd "models\CNN Brain Tumor Classifier"
-python test.py
-This script:
+---
 
-Loads the trained CNN model
-Runs inference on the test dataset
-Classifies each scan as 0 (no tumor) or 1 (tumor present)
-Outputs classification results and accuracy metrics
-Prepares positive cases for bounding box prediction
-Step 3: Run YOLO Bounding Box Predictor
-Finally, for the images classified as having tumors, use the YOLOv8 model to detect the precise location of the tumors:
+## ⚙️ Requirements
 
-bash
-CopyInsert in Terminal
-python src/models/predict.py
-The YOLO prediction script:
+- Python 3.8+
+- PyTorch 1.10+
+- Ultralytics YOLOv8
+- OpenCV
+- Pillow
+- Matplotlib
+- NumPy
 
-Loads the pre-trained YOLOv8 model optimized for brain tumor detection
-Processes images that were classified as positive (containing tumors) by the CNN
-Generates bounding boxes around detected tumor regions
-Calculates prediction metrics (precision, recall, mAP)
-Creates visualization outputs in the results directory
-Expected Outputs
-After completing all three steps, you'll have:
-
-Classification Results: Binary classification of each brain scan (0 or 1)
-Bounding Box Visualizations: Images with highlighted tumor regions
-Performance Metrics: Accuracy, precision, recall, and mAP scores for the models
-All output visualizations are saved to the results directory, with:
-
-results/predictions: Contains brain scans with predicted bounding boxes
-results/visualizations: Shows comparative visualizations of predictions vs. ground truth
-Requirements
-Python 3.8 or higher
-PyTorch 1.10 or higher
-Ultralytics YOLOv8
-OpenCV
-PIL
-Matplotlib
-NumPy
-Install dependencies with:
-
-bash
-CopyInsert in Terminal
+```bash
 pip install torch torchvision ultralytics opencv-python pillow matplotlib numpy
-Notes
-The CNN model identifies if a tumor is present in the scan
-The YOLOv8 model precisely locates the tumor with a bounding box
-This two-stage approach provides both detection and localization
-Configuration settings can be modified in src/config/config.py
+🚀 Usage
+1. Train the CNN classifier
+bash
+Copy
+Edit
+cd models/"CNN Brain Tumor Classifier"
+python main.py
+Loads and augments your MRI dataset
+
+Builds & trains the CNN
+
+Saves tumor_classifier.pth to the project root
+
+Prints training loss & accuracy
+
+2. Evaluate the CNN
+bash
+Copy
+Edit
+cd models/"CNN Brain Tumor Classifier"
+python test.py
+Loads tumor_classifier.pth
+
+Runs inference on your test set
+
+Outputs per‑image labels (0 = no tumor, 1 = tumor)
+
+Prints overall accuracy, precision, recall
+
+Copies all “1”‑labeled images into a staging folder for YOLO
+
+3. Localize tumors with YOLOv8
+bash
+Copy
+Edit
+cd src/models
+python predict.py
+Loads the pretrained YOLOv8 brain‑tumor model
+
+Processes all CNN‑positive scans
+
+Draws bounding boxes around tumors
+
+Computes precision, recall, mAP
+
+Saves results to results/predictions & results/visualizations
+
+📊 Expected Outputs
+Binary labels for each scan (0 or 1)
+
+Bounding‑box images in results/predictions/
+
+Side‑by‑side comparison in results/visualizations/
+
+Metrics report (accuracy, precision, recall, mAP)
+
+📝 Configuration
+All paths, hyperparameters, and model settings live in:
+
+arduino
+Copy
+Edit
+src/config/config.py
+Feel free to tweak learning rates, batch sizes, YOLO thresholds, etc., right there.
+
+🔍 Notes
+This two‑stage pipeline gives you both detection (is there a tumor?) and localization (where is it?).
+
+For best results, ensure your MRI scans are pre‑aligned and normalized.
+
+You can swap in your own dataset by following the same folder structure under data/ and adjusting config.py.
